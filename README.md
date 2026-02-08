@@ -12,6 +12,33 @@
 
 ## 📦 部署方式
 
+### 🐳 单容器部署（最简单，推荐）
+
+一个容器包含前端 + 后端 + Nginx，最简单的部署方式。
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/tizhihua8/z-image-v2.git
+cd z-image-v2
+
+# 2. 一键部署（Linux/macOS）
+chmod +x deploy-single.sh
+./deploy-single.sh
+
+# Windows 用户双击
+# deploy-single.bat
+```
+
+**Docker Hub 镜像：**
+```bash
+docker pull tizhihua8/z-image:latest
+docker run -d -p 80:80 --name zimage \
+  -e SECRET_KEY=your-key \
+  -e LINUX_DO_CLIENT_ID=your-id \
+  -e LINUX_DO_CLIENT_SECRET=your-secret \
+  tizhihua8/z-image:latest
+```
+
 ### 🐳 Docker Hub 镜像部署（最快，推荐）
 
 使用预构建镜像，无需等待编译：
@@ -30,9 +57,12 @@ docker-compose up -d
 ```
 
 **可用镜像：**
-- `tizhihua8/z-image-server:latest` - 后端服务
-- `tizhihua8/z-image-web:latest` - 前端服务
-- `tizhihua8/z-image-worker:latest` - GPU Worker
+| 镜像 | 说明 | 推荐场景 |
+|------|------|----------|
+| `tizhihua8/z-image:latest` | 单容器（前端+后端+Nginx） | **推荐**，最简单 |
+| `tizhihua8/z-image-server:latest` | 仅后端服务 | 多容器部署 |
+| `tizhihua8/z-image-web:latest` | 仅前端服务 | 多容器部署 |
+| `tizhihua8/z-image-worker:latest` | GPU Worker | 独立部署 |
 
 ### 🐳 Docker 本地构建
 
