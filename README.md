@@ -1,7 +1,7 @@
 # RyanVan Z-Image
 
 [![Build and Push Docker Images](https://github.com/tizhihua8/z-image-v3/actions/workflows/docker-build.yml/badge.svg)](https://github.com/tizhihua8/z-image-v3/actions/workflows/docker-build.yml)
-[![Docker Hub](https://img.shields.io/badge/docker-tizhihua8%2Fz--image-blue)](https://hub.docker.com/u/tizhihua8)
+[![Docker Hub](https://img.shields.io/badge/docker-tizhihua%2Fz--image-blue)](https://hub.docker.com/r/tizhihua/z-image)
 
 基于 Z-Image-Turbo 模型的在线 AI 图像生成服务。
 
@@ -31,12 +31,12 @@ chmod +x deploy-single.sh
 
 **Docker Hub 镜像：**
 ```bash
-docker pull tizhihua8/z-image:latest
+docker pull tizhihua/z-image:latest
 docker run -d -p 80:80 --name zimage \
   -e SECRET_KEY=your-key \
   -e LINUX_DO_CLIENT_ID=your-id \
   -e LINUX_DO_CLIENT_SECRET=your-secret \
-  tizhihua8/z-image:latest
+  tizhihua/z-image:latest
 ```
 
 **使用 Docker Compose：**
