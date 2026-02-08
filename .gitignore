@@ -65,12 +65,11 @@ test_*.png
 *.tmp
 *.temp
 
-# Local scripts (contain user paths or for local use only)
-deploy*.bat
-deploy*.sh
-worker-manager.bat
-开启生图服务.bat
-关闭生图服务.bat
+# Local deployment scripts (user-specific, contain local paths)
+# 官方部署脚本 (deploy-docker.sh, deploy-docker.bat) 会被提交到仓库
+# 只有用户创建的本地脚本才应被忽略
+deploy-local.bat
+deploy-local.sh
 
 # Playwright MCP
 .playwright-mcp/
