@@ -19,15 +19,6 @@ on:
       - 'v*'
   workflow_dispatch:  # 允许手动触发
 
-env:
-  # Docker 镜像名称前缀（使用你的 Docker Hub 用户名）
-  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/z-image
-  # 镜像标签: 基于 git ref 生成
-  # - main 分支: latest
-  # - tag: v1.0.0
-  # - commit: commit-sha
-  TAG: ${{ github.ref_name == 'main' && 'latest' || github.ref_name }}
-
 jobs:
   # ============================================
   # 构建后端镜像 (Server)
@@ -53,7 +44,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.IMAGE_NAME }}-server
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/z-image-server
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=semver,pattern={{version}}
@@ -96,7 +87,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.IMAGE_NAME }}-web
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/z-image-web
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=semver,pattern={{version}}
@@ -141,7 +132,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.IMAGE_NAME }}-worker
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/z-image-worker
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=semver,pattern={{version}}
