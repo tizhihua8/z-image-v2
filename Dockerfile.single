@@ -3,6 +3,9 @@
 # ============================================
 # 这个镜像包含前端 + 后端 + Nginx，一个容器运行全部
 
+# ============================================
+# 前端构建阶段
+# ============================================
 FROM node:20-alpine AS web-builder
 
 WORKDIR /app/web
@@ -46,19 +49,17 @@ WORKDIR /app
 COPY --from=backend-builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=backend-builder /app/server /app/server
 
-# 从 web-builder 复制前端构建产物
-COPY --from=web-builder /app/web/.next /app/web/.next
+# 从 web-builder 复制 Next.js standalone 输出
+# Next.js standalone 模式只需要这些文件
+COPY --from=web-builder /app/web/.next/standalone /app/web/.next/standalone
+COPY --from=web-builder /app/web/.next/static /app/web/.next/static
 COPY --from=web-builder /app/web/public /app/web/public
-COPY --from=web-builder /app/web/package.json /app/web/
-COPY --from=web-builder /app/web/node_modules /app/web/node_modules
-COPY --from=web-builder /app/web/next.config.mjs /app/web/
 
 # 创建数据目录
 RUN mkdir -p /app/data /app/storage /var/log/supervisor
 
 # 复制应用代码
 COPY server /app/server
-COPY web /app/web
 
 # 配置 Nginx
 COPY deploy/nginx-single.conf /etc/nginx/sites-available/default
@@ -67,7 +68,8 @@ COPY deploy/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # 设置环境变量
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    NODE_ENV=production
+    NODE_ENV=production \
+    PORT=3000
 
 # 暴露端口
 EXPOSE 80

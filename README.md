@@ -12,14 +12,14 @@
 
 ## 📦 部署方式
 
-### 🐳 单容器部署（最简单，推荐）
+### 🐳 单容器部署（推荐）
 
 一个容器包含前端 + 后端 + Nginx，最简单的部署方式。
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/tizhihua8/z-image-v2.git
-cd z-image-v2
+git clone https://github.com/tizhihua8/z-image-v3.git
+cd z-image-v3
 
 # 2. 一键部署（Linux/macOS）
 chmod +x deploy-single.sh
@@ -39,13 +39,10 @@ docker run -d -p 80:80 --name zimage \
   tizhihua8/z-image:latest
 ```
 
-### 🐳 Docker Hub 镜像部署（最快，推荐）
-
-使用预构建镜像，无需等待编译：
-
+**使用 Docker Compose：**
 ```bash
 # 1. 下载配置文件
-curl -O https://raw.githubusercontent.com/tizhihua8/z-image-v3/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/tizhihua8/z-image-v3/main/docker-compose.single.yml
 curl -O https://raw.githubusercontent.com/tizhihua8/z-image-v3/main/.env.docker.example
 
 # 2. 配置环境变量
@@ -53,24 +50,7 @@ cp .env.docker.example .env
 nano .env  # 修改必填项
 
 # 3. 启动服务
-docker-compose up -d
-```
-
-**可用镜像：**
-| 镜像 | 说明 | 推荐场景 |
-|------|------|----------|
-| `tizhihua8/z-image:latest` | 单容器（前端+后端+Nginx） | **推荐**，最简单 |
-| `tizhihua8/z-image-server:latest` | 仅后端服务 | 多容器部署 |
-| `tizhihua8/z-image-web:latest` | 仅前端服务 | 多容器部署 |
-| `tizhihua8/z-image-worker:latest` | GPU Worker | 独立部署 |
-
-### 🐳 Docker 本地构建
-
-```bash
-# 一键部署
-git clone https://github.com/tizhihua8/z-image-v3.git
-cd z-image-v3
-./deploy-docker.sh
+docker compose -f docker-compose.single.yml up -d
 ```
 
 详细文档: [Docker 部署指南](./docs/DOCKER_DEPLOY.md)
@@ -85,21 +65,62 @@ cd z-image-v3
 
 ```
 Z-Image-v3/
-├── web/                    # Next.js 前端
-├── server/                 # FastAPI 后端
-├── worker/                 # 本地 GPU Worker
-├── docs/                   # 文档
-│   ├── DOCKER_DEPLOY.md    # Docker 部署指南
-│   └── LINUX_DO_CONNECT.md # OAuth 接入文档
-├── docker-compose.yml      # Docker 编排配置
-├── deploy-docker.sh        # 一键部署脚本 (Linux/macOS)
-├── deploy-docker.bat       # 一键部署脚本 (Windows)
-└── .env.docker.example     # 环境变量模板
+├── web/                       # Next.js 前端
+├── server/                    # FastAPI 后端
+├── worker/                    # 本地 GPU Worker
+├── deploy/                    # 部署配置
+│   ├── nginx-single.conf     # Nginx 单容器配置
+│   └── supervisord.conf      # Supervisor 进程管理配置
+├── docs/                      # 文档
+│   ├── DOCKER_DEPLOY.md      # Docker 部署指南
+│   └── LINUX_DO_CONNECT.md   # OAuth 接入文档
+├── docker-compose.single.yml  # Docker 单容器编排配置
+├── Dockerfile.single          # 单容器 Dockerfile
+├── deploy-single.sh           # 一键部署脚本 (Linux/macOS)
+├── deploy-single.bat          # 一键部署脚本 (Windows)
+└── .env.docker.example        # 环境变量模板
 ```
 
 ## 🚀 快速开始
 
+### 环境变量配置
+
+复制 `.env.docker.example` 为 `.env` 并修改以下必填项：
+
+```bash
+# 基础配置
+DOMAIN=your-domain.com
+SECRET_KEY=your-random-secret-key
+
+# Linux DO Connect OAuth
+LINUX_DO_CLIENT_ID=your-client-id
+LINUX_DO_CLIENT_SECRET=your-client-secret
+
+# Worker API 密钥
+WORKER_API_KEY=your-worker-api-key
+```
+
+### 本地开发
+
+```bash
+# 启动前端
+cd web
+npm install
+npm run dev
+
+# 启动后端
+cd server
+pip install -r requirements.txt
+python -m uvicorn app.main:app --reload
+
+# 启动 Worker（需要 GPU）
+cd worker
+pip install -r requirements.txt
+python worker.py
+```
+
 ### Worker 管理
+
 ```
 双击：worker-manager.bat
 
@@ -115,17 +136,15 @@ Z-Image-v3/
 
 **注意：** 启动后需等待 15-20 秒加载模型
 
-## 🔧 部署前端更新
+## 🔒 安全配置
 
-### 快速部署（日常更新，约 1MB）
-```
-双击：deploy-fast.bat
-```
+- 所有敏感信息通过环境变量配置
+- `.env` 文件已被 `.gitignore` 排除
+- 生产环境建议配置防火墙规则
 
-### 完整部署（首次或大改动，约 15MB）
-```
-双击：deploy-web.bat
-```
+### 环境变量位置
+- **Docker 部署**: 项目根目录 `.env` 文件
+- **本地 Worker**: `worker/.env` 文件
 
 ## 📊 配额规则
 
@@ -135,21 +154,6 @@ Z-Image-v3/
 | 2 级 | 5 张 |
 | 3-4 级 | 20 张 |
 | 管理员 | 1000 张 |
-
-## 🔒 安全配置
-
-- 所有敏感信息通过环境变量配置
-- `.env` 文件已被 `.gitignore` 排除
-- VPS 已配置拒绝 IP 直接访问
-
-### 环境变量位置
-- **VPS 后端**: `/var/www/zimage/server/.env`
-- **本地 Worker**: `D:\Z-Image\worker\.env`
-
-## 🖥️ 部署信息
-
-- **前端端口**: 3001 (或自定义)
-- **后端端口**: 8001 (或自定义)
 
 ## 📝 开发备注
 
