@@ -1,0 +1,23 @@
+# Z-Image Worker 依赖
+# Python 版本要求: >= 3.10
+
+# PyTorch - CUDA 12.1 版本
+# 注意: 需要根据实际 CUDA 版本调整
+torch==2.1.0
+torchvision==0.16.0
+--extra-index-url https://download.pytorch.org/whl/cu121
+
+# Diffusers - 从源码安装（支持最新模型）
+# pip install git+https://github.com/huggingface/diffusers
+
+# 其他依赖
+transformers>=4.40.0
+accelerate>=0.30.0
+safetensors>=0.4.0
+sentencepiece>=0.1.99
+huggingface_hub>=0.23.0
+Pillow>=10.0.0
+
+# HTTP 客户端
+httpx>=0.26.0
+python-dotenv>=1.0.0

@@ -1,0 +1,24 @@
+# Z-Image 本地部署依赖
+# Python 版本要求: >= 3.10
+
+# 核心依赖 - 从源码安装 diffusers（包含 Z-Image 支持）
+# pip install git+https://github.com/huggingface/diffusers
+
+# PyTorch - 请根据你的 CUDA 版本选择合适的安装方式
+# 推荐 CUDA 12.1+，访问 https://pytorch.org/get-started/locally/ 获取安装命令
+# torch>=2.1.0
+# torchvision>=0.16.0
+
+# 其他依赖
+transformers>=4.40.0
+accelerate>=0.30.0
+safetensors>=0.4.0
+sentencepiece>=0.1.99
+huggingface_hub>=0.23.0
+Pillow>=10.0.0
+
+# 可选：ModelScope 支持（如果从 ModelScope 下载模型）
+# modelscope>=1.10.0
+
+
+

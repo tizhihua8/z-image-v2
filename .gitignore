@@ -1,0 +1,81 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+.eggs/
+*.egg-info/
+*.egg
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Storage (generated images)
+storage/
+
+# Logs
+*.log
+logs/
+
+# Cache
+.cache/
+*.cache
+
+# Node modules (frontend)
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Model cache
+models/
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# Test outputs
+outputs/
+test_*.png
+
+# Temporary files
+*.tmp
+*.temp
+
+# Local scripts (contain user paths or for local use only)
+deploy*.bat
+deploy*.sh
+worker-manager.bat
+开启生图服务.bat
+关闭生图服务.bat
+
+# Playwright MCP
+.playwright-mcp/
+
+# Serena
+.serena/
+
+

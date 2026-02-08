@@ -1,0 +1,123 @@
+# ============================================
+# Z-Image v3 Docker Compose 配置
+# ============================================
+# 使用方法:
+# 1. 复制环境变量模板: cp .env.docker.example .env
+# 2. 编辑 .env 文件，填写必要的配置
+# 3. 启动服务: docker-compose up -d
+# 4. 查看日志: docker-compose logs -f
+
+version: '3.8'
+
+services:
+  # ============================================
+  # 后端服务 (FastAPI)
+  # ============================================
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: zimage-server
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    environment:
+      # 基础配置
+      - DEBUG=${DEBUG:-false}
+      - SECRET_KEY=${SECRET_KEY}
+      # 数据库
+      - DATABASE_URL=sqlite+aiosqlite:///./app/data/zimage.db
+      # OAuth
+      - LINUX_DO_CLIENT_ID=${LINUX_DO_CLIENT_ID}
+      - LINUX_DO_CLIENT_SECRET=${LINUX_DO_CLIENT_SECRET}
+      - LINUX_DO_REDIRECT_URI=${LINUX_DO_REDIRECT_URI:-https://${DOMAIN}/api/auth/callback}
+      # 前端地址
+      - FRONTEND_URL=${FRONTEND_URL:-https://${DOMAIN}}
+      # 管理员
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      # Worker
+      - WORKER_API_KEY=${WORKER_API_KEY}
+      # 存储
+      - STORAGE_ROOT=/app/storage
+      # 队列配置
+      - MAX_QUEUE_LENGTH=${QUEUE_SOFT_LIMIT:-50}
+      - HARD_QUEUE_LIMIT=${QUEUE_HARD_LIMIT:-500}
+      - JOB_TIMEOUT_SECONDS=${JOB_TIMEOUT:-300}
+    volumes:
+      # 数据持久化
+      - zimage-db:/app/data
+      - zimage-storage:/app/storage
+    networks:
+      - zimage-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ============================================
+  # 前端服务 (Next.js)
+  # ============================================
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://${DOMAIN}}
+    container_name: zimage-web
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - zimage-network
+    depends_on:
+      - server
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ============================================
+  # Nginx 反向代理 (可选)
+  # ============================================
+  # 取消注释以启用 Nginx
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: zimage-nginx
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./deploy/nginx-docker.conf:/etc/nginx/conf.d/default.conf:ro
+  #     - ./deploy/ssl:/etc/nginx/ssl:ro
+  #   networks:
+  #     - zimage-network
+  #   depends_on:
+  #     - web
+  #     - server
+
+# ============================================
+# 网络配置
+# ============================================
+networks:
+  zimage-network:
+    driver: bridge
+    name: zimage-network
+
+# ============================================
+# 数据卷
+# ============================================
+volumes:
+  zimage-db:
+    driver: local
+    name: zimage-db
+  zimage-storage:
+    driver: local
+    name: zimage-storage
